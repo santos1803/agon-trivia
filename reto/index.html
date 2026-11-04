@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0B0B0C">
+<title>Te retaron en Agon Trivia</title>
+<meta property="og:title" content="⚔️ Te retaron a un duelo en Agon Trivia">
+<meta property="og:description" content="Toca para entrar a la arena y jugar 1 vs 1 al mismo tiempo.">
+<style>
+:root{--bg:#0B0B0C;--panel:#151413;--line:#2A2621;--gold:#D4A64A;--gold-hi:#E8C46E;--fg:#F3EDE2;--muted:#9C9384}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+main{min-height:100vh;max-width:440px;margin:0 auto;padding:40px 20px calc(32px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;align-items:center;gap:18px;text-align:center}
+h1{font-family:Georgia,"Times New Roman",serif;letter-spacing:6px;color:var(--gold);font-size:40px;margin:0}
+.sub{letter-spacing:8px;color:var(--gold);font-size:12px;margin-top:-14px}
+.card{width:100%;background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:20px 18px;display:flex;flex-direction:column;gap:12px}
+.who{font-size:21px;font-weight:700;margin:0}
+.code{font-family:Georgia,serif;font-size:38px;letter-spacing:8px;color:var(--gold);font-weight:700}
+.btn{display:flex;align-items:center;justify-content:center;min-height:60px;border-radius:14px;background:var(--gold);color:var(--bg);font-weight:800;font-size:18px;text-decoration:none;border:0;width:100%}
+.btn:active{background:var(--gold-hi)}
+.btn.line{background:transparent;color:var(--fg);border:1.5px solid var(--gold);font-weight:700;font-size:16px;min-height:52px}
+.note{color:var(--muted);font-size:14px;margin:0}
+ol{text-align:left;margin:0;padding-left:20px;color:var(--fg)}
+li{margin:4px 0}
+[hidden]{display:none!important}
+</style>
+</head>
+<body>
+<main>
+  <svg width="72" height="72" viewBox="0 0 120 120" fill="none" stroke="#D4A64A" stroke-width="3" aria-hidden="true">
+    <path d="M44 104 C 18 90, 12 52, 32 22"/><path d="M76 104 C 102 90, 108 52, 88 22"/>
+    <path d="M40 50 60 38l20 12z"/><path d="M42 54h36"/><path d="M47 58v20M55 58v20M65 58v20M73 58v20"/><path d="M40 82h40M37 87h46"/>
+  </svg>
+  <h1>AGON</h1><div class="sub">TRIVIA</div>
+
+  <div class="card" id="ok">
+    <p class="who" id="who">¡Te retaron a un duelo!</p>
+    <p class="note">Toca el botón para entrar a la arena. Cuando estén los dos, empieza el 1 vs 1 al mismo tiempo.</p>
+    <a class="btn" id="go" href="#">Entrar a la arena</a>
+    <span class="note">Código de la arena</span>
+    <span class="code" id="code">······</span>
+    <button class="btn line" type="button" id="copy">Copiar código</button>
+  </div>
+
+  <div class="card" id="noapp" hidden>
+    <p class="who">Todavía no tienes Agon Trivia</p>
+    <ol>
+      <li>Pídele a quien te invitó el archivo de la app (versión de prueba) o descárgala cuando esté en Google Play.</li>
+      <li>Instálala y ábrela.</li>
+      <li>Vuelve a tocar el link, o entra a <b>Duelo 1 vs 1</b> y escribe el código.</li>
+    </ol>
+  </div>
+
+  <div class="card" id="bad" hidden>
+    <p class="who">Este link no tiene un código válido</p>
+    <p class="note">Pídele a tu amigo que te mande la invitación otra vez.</p>
+  </div>
+
+  <p class="note" id="other" hidden>Agon Trivia es una app para Android. Abre este link en tu teléfono Android.</p>
+</main>
+<script>
+(function(){
+  var q = new URLSearchParams(location.search);
+  var code = (q.get("c") || "").toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 6);
+  var name = (q.get("n") || "").replace(/[<>]/g, "").slice(0, 18);
+  var $ = function(id){ return document.getElementById(id); };
+  if (code.length !== 6){ $("ok").hidden = true; $("bad").hidden = false; return; }
+  $("code").textContent = code;
+  if (name) $("who").textContent = "¡" + name + " te reta a un duelo!";
+  if (q.get("sin")){ $("noapp").hidden = false; }
+  var android = /Android/i.test(navigator.userAgent);
+  var fallback = location.origin + location.pathname + "?c=" + code + (name ? "&n=" + encodeURIComponent(name) : "") + "&sin=1";
+  var intent = "intent://reto/" + code + "#Intent;scheme=agontrivia;package=com.agontrivia.app;S.browser_fallback_url=" + encodeURIComponent(fallback) + ";end";
+  $("go").href = android ? intent : "agontrivia://reto/" + code;
+  if (!android) $("other").hidden = false;
+  if (android && !q.get("sin")) setTimeout(function(){ location.href = intent; }, 350);
+  $("copy").addEventListener("click", function(){
+    var done = function(){ $("copy").textContent = "¡Copiado!"; };
+    try{ navigator.clipboard.writeText(code).then(done, function(){}); }catch(e){}
+  });
+})();
+</script>
+</body>
+</html>
